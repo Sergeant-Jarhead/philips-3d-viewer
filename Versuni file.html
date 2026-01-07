@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script type="module"
+    src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Page background */
+    body {
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Phone frame */
+    .phone {
+      width: 375px;
+  height: 812px;
+  background: #676767;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+    }
+
+    /* Header */
+    .header {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  right: 25px;
+  height: 60px;
+
+  background: rgba(213, 213, 213, 0.51);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  border-radius: 12px;
+
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+
+  padding: 0 8px;
+  z-index: 10;
+}
+
+.header-title {
+  justify-self: center;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+
+    .search-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+
+    stroke: #fff;
+    stroke-width: 2;
+    fill: none;
+  }
+
+    /* Main content area */
+    .content {
+    position: absolute;
+  inset: 0;        /* shorthand for top/left/right/bottom = 0 */
+    }
+
+    model-viewer {
+  width: 100%;
+  height: 100%;
+}
+
+.auto-hotspot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.auto-hotspot.visible {
+  opacity: 0.8;
+}
+
+.bubble {
+  display: inline-flex;      /* key: shrink to content */
+  align-self: flex-start;    /* prevents stretching */
+
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  white-space: nowrap;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.bubble-small {
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 12px;
+}
+
+.calc-hotspot {
+  position: relative;   /* 👈 restores pulse anchoring */
+  transform: translateY(-6px);
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: transparent;
+
+  animation: pulse 1.8s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.water-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.power-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.power-hotspot {
+  transform: translateY(-4px);
+}
+
+.board-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.board-hotspot {
+  transform: translateY(-8px);
+}
+
+.dock-hotspot {
+  transform: translateX(-45%);
+}
+
+.dock-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iron-hotspot {
+  transform: translateX(-45%);
+}
+
+.iron-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hanger-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+model-viewer::part(default-progress-bar) {
+  display: none;
+}
+
+/* Custom circular loader */
+.loader {
+  position: absolute;
+  inset: 0;
+  z-index: 20; /* higher than hotspots */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.35);
+}
+
+.spinner {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+}
+
+.progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ffffff;
+
+  animation: spin 1s linear infinite;
+}
+
+.bubble-link {
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+  pointer-events: auto; /* CRITICAL */
+}
+
+.bubble-link:active {
+  transform: scale(0.96);
+}
+
+/* ===== OVERLAY ===== */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 15;
+}
+
+.overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 85%;
+  max-width: 320px;
+  height: 100%;
+  background: #ffffff;
+  transform: translateX(-100%);
+  transition: transform 0.35s ease;
+  z-index: 16;
+  border-top-right-radius: 24px;
+  border-bottom-left-radius: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.active {
+  transform: translateX(0);
+}
+
+/* Header */
+.sidebar-header {
+  padding: 24px;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+}
+
+/* Accordion buttons */
+.accordion-btn {
+  width: 100%;
+  padding: 18px 24px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+/* Arrow */
+.accordion-btn::after {
+  content: "▾";
+  float: right;
+  transition: transform 0.25s ease;
+}
+
+.accordion-btn.active::after {
+  transform: rotate(180deg);
+}
+
+/* Submenu */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.accordion.open .accordion-content {
+  max-height: 120px;
+}
+
+/* Sub items */
+.submenu-item {
+  padding: 8px 32px;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: #555;
+}
+
+/* KEY FIX */
+/* Assembly / Disassembly should NOT draw a divider */
+.accordion > .accordion-btn {
+  border-bottom: none;
+}
+
+/* Divider AFTER Assembly / Disassembly block */
+.accordion {
+  border-bottom: 1px solid #eee;
+}
+
+.submenu-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+}
+
+.submenu-link:active {
+  background: rgba(0,0,0,0.04);
+}
+
+.accordion-btn::after {
+  content: none;
+}
+
+.accordion > .accordion-btn::after {
+  content: "▾";
+  float: right;
+  transition: transform 0.25s ease;
+}
+
+.accordion-btn.active::after {
+  transform: rotate(180deg);
+}
+
+/* Make direct-link items look exactly like buttons */
+.accordion-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* Prevent visited / hover states from changing colour */
+.accordion-link:visited,
+.accordion-link:hover,
+.accordion-link:active {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ===== SCREEN SWITCHING ===== */
+.screen {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.home-btn {
+  padding: 18px;
+  border-radius: 16px;
+  border: none;
+  background: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  cursor: pointer;
+}
+
+#home-screen {
+  z-index: 5;
+}
+
+#explore-screen {
+  z-index: 1;
+}
+
+/* ===== HOME SCREEN BACKGROUND ===== */
+#home-screen {
+  background: linear-gradient(
+    to bottom,
+    #ffffff 0%,
+    #ffffff 52%,
+    #f7fbff 65%,
+    #f3f8fb 100%
+  );
+}
+
+/* ===== PRODUCT ROW ===== */
+.product-row {
+  display: flex;
+  align-items: center;      /* vertical alignment */
+  justify-content: center;  /* keeps it centred in the phone */
+  gap: 16px;
+  margin-top: 24px;
+}
+
+/* Image */
+.product-image {
+  height: 220px;   /* tweak to taste */
+  width: auto;
+  object-fit: contain;
+}
+
+/* Text block */
+.product-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+/* Typography */
+.product-text .brand {
+  color: #0050ff;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.product-text .title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+}
+
+#home-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* centers the whole block */
+  gap: 28px;               /* space between image + text */
+  padding: 32px 32px 16px;
+  flex: 1;
+  max-height: 65%;
+}
+
+/* BIG product image */
+.hero-image {
+  height: 360px;   /* << make it BIG */
+  max-width: 45%;
+  object-fit: contain;
+}
+
+/* Text block */
+.hero-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.hero-text .brand {
+  color: #0050ff;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.hero-text .product {
+  font-size: 16px;        /* same scale as Quickstart */
+  font-weight: 500;       /* matches button weight */
+  color: #000;
+  white-space: nowrap;    /* FORCE single line */
+}
+
+.home-buttons {
+  display: flex;
+  flex-direction: column;   /* 👈 STACK VERTICALLY */
+  gap: 12px;
+  padding: 24px;
+  padding-bottom: 36px; /* 👈 gives breathing room */
+  justify-content: space-between;
+}
+
+.hero-text {
+  min-width: 170px;   /* prevents wrapping */
+  white-space: nowrap;
+}
+
+/* ===== EXIT BUTTON ===== */
+.exit-btn {
+  background: none;
+  border: none;
+  padding: 0;
+
+  color: #fff;
+  font-size: 24px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.exit-btn:active {
+  transform: scale(0.95);
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.back-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+
+  background: none;      /* 🔑 removes box */
+  border: none;
+  border-radius: 0;      /* 🔑 removes rounded shape */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  color: #fff;
+}
+
+.icon-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* Make burger menu bigger ONLY */
+#menu-btn svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2.6;
+}
+
+.icon-btn:active {
+  transform: scale(0.95);
+}
+
+.header {
+  pointer-events: auto;
+}
+
+.header * {
+  pointer-events: auto;
+}
+
+.content {
+  pointer-events: none;
+}
+
+.home-btn {
+  color: #000;               /* same as Explore / Troubleshooting */
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Kill link states completely */
+.home-btn:visited,
+.home-btn:hover,
+.home-btn:active {
+  color: #000;
+  text-decoration: none;
+}
+
+  </style>
+</head>
+
+<body>
+
+  <div class="phone">
+
+  <!-- ================= HOME SCREEN ================= -->
+  <section id="home-screen" class="screen active">
+
+  <!-- TOP HERO AREA -->
+  <div class="hero">
+    <img
+      src="Phillips.png"
+      alt="Philips All-in-One 6000"
+      class="hero-image"
+    />
+
+    <div class="hero-text">
+      <div class="brand">PHILIPS</div>
+      <div class="product">All-in-One 6000 Series</div>
+    </div>
+  </div>
+
+  <!-- BUTTONS AREA -->
+  <div class="home-buttons">
+    <a
+  href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2963-77712&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2963%3A77712&show-proto-sidebar=1"
+  target="_blank"
+  class="home-btn"
+  style="text-decoration: none; text-align: center;"
+>
+  Quickstart
+</a>
+
+    <button class="home-btn" id="explore-btn">Explore</button>
+    <a
+  href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2970-78022&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2970%3A78022&show-proto-sidebar=1"
+  target="_blank"
+  class="home-btn"
+>
+  Troubleshooting
+</a>
+
+  </div>
+
+</section>
+
+
+  <!-- ================= EXPLORE SCREEN ================= -->
+  <section id="explore-screen" class="screen">
+
+   <div class="header">
+
+  <!-- LEFT: BURGER -->
+  <button class="icon-btn" id="menu-btn" aria-label="Menu">
+    <svg viewBox="0 0 24 24">
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <!-- CENTER: TITLE -->
+  <span class="header-title">Search</span>
+
+  <!-- RIGHT: EXIT -->
+  <button class="icon-btn exit-btn" id="exit-btn" aria-label="Exit">
+    ✕
+  </button>
+
+</div>
+
+   <!-- Custom loading screen -->
+<div class="loader" id="explore-loader">
+  <div class="spinner">
+    <div class="spinner-ring"></div>
+    <span class="progress-text">0%</span>
+  </div>
+</div>
+
+  <model-viewer
+  id="viewer"
+  src="model.glb"
+  camera-controls
+  touch-action="pan-y"
+  exposure="1"
+  shadow-intensity="0.2">
+
+  <div
+     id="water-hotspot"
+  class="auto-hotspot"
+  slot="hotspot-water"
+  data-position="5m 0.5m 0.03m"
+  data-normal="0m 0m 1m">
+
+  <div class="water-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2801-39998&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2801%3A39998&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-link">
+    • Types of water to use
+  </a>
+</div>
+
+ <div class="water-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2806-40247&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2806%3A40247&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-link">
+    • How to fill water
+  </a>
+</div>
+
+    </div>
+
+    <div
+  id="calc-hotspot"
+  class="auto-hotspot calc-hotspot"
+  slot="hotspot-calc"
+  data-position="2m 0.02m 0.06m"
+  data-normal="0m 1m 0m">
+
+  <div class="pulse-ring"></div>
+
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2744-13673&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2744%3A13673&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-small bubble-link">
+    Descale
+  </a>
+
+  </div>
+
+  <div
+  id="power-hotspot"
+  class="auto-hotspot power-hotspot"
+  slot="hotspot-power"
+  data-position="-2m 0m 0.04m"
+  data-normal="0m 1m 0m">
+
+  <!-- Auto Shut-off -->
+<div class="power-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2792-39837&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2792%3A39837&show-proto-sidebar="
+    target="_blank"
+    class="bubble bubble-link">
+    • Auto Shut-off
+  </a>
+</div>
+
+<!-- Power on -->
+<div class="power-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2753-39756&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2753%3A39756&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-link">
+    • Power on
+  </a>
+</div>
+
+
+</div>
+
+  <div
+  id="board-hotspot"
+  class="auto-hotspot board-hotspot"
+  slot="hotspot-board-0"
+  data-position="10m 60m 0.03m"
+  data-normal="0m 0m 1m">
+
+  <div class="board-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2811-40686&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2811%3A40686&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-link">
+    • Adjust the height
+  </a>
+</div>
+
+  <div class="board-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2811-40767&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2811%3A40767&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-link">
+    • Adjust board position
+  </a>
+</div>
+
+</div>
+
+<div
+  id="dock-hotspot"
+  class="auto-hotspot dock-hotspot"
+  slot="hotspot-dock"
+  data-position="20m 41m 0.10m"
+  data-normal="0m 0m 1m">
+
+  <div class="dock-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2811-40337&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2811%3A40337&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-link">
+    • Changing the dock
+  </a>
+</div>
+
+</div>
+
+<div
+  id="iron-hotspot"
+  class="auto-hotspot iron-hotspot"
+  slot="hotspot-iron"
+  data-position="21m 47m 0.18m"
+  data-normal="0m 0m 1m">
+
+  <div class="iron-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2811-40435&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2811%3A40435&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-link">
+    • Steam Lock
+  </a>
+</div>
+
+  <div class="iron-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2811-40517&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2811%3A40517&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-link">
+    • Steam Boost
+  </a>
+</div>
+
+</div>
+
+<div
+  id="hanger-hotspot"
+  class="auto-hotspot hanger-hotspot"
+  slot="hotspot-hanger"
+  data-position="2m 75m 1m"
+  data-normal="1m 1m -1m">
+
+ <div class="hanger-row">
+  <div class="pulse-ring"></div>
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2811-40604&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2811%3A40604&show-proto-sidebar=1"
+    target="_blank"
+    class="bubble bubble-link">
+    • Hanger Hook usage
+  </a>
+</div>
+
+</div>
+
+ </model-viewer>
+
+ <!-- ===== SIDEBAR OVERLAY ===== -->
+<div id="overlay" class="overlay"></div>
+
+<aside id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <span>General Topics</span>
+  </div>
+
+ <a
+  href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2888-41718&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2888%3A41718&show-proto-sidebar=1"
+  target="_blank"
+  class="accordion-btn accordion-link">
+  Maintenance & storage
+</a>
+
+  <!-- Warnings -->
+ <a
+  href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2876-41308&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2876%3A41308&show-proto-sidebar=1"
+  target="_blank"
+  class="accordion-btn accordion-link">
+  Warnings
+</a>
+
+  <!-- Assembly / Disassembly (custom accordion) -->
+  <div class="accordion">
+  <button class="accordion-btn accordion-toggle">
+    Assembly / Disassembly
+  </button>
+
+  <div class="accordion-content">
+  <a
+    href="https://www.figma.com/proto/64y7xmIZHRGdqq2DfmPBeU/Versuni-internship?node-id=2864-40961&t=9F0sOYGOLbW84zkW-0&scaling=min-zoom&content-scaling=fixed&page-id=283%3A30629&starting-point-node-id=2864%3A40961&show-proto-sidebar=1"
+    target="_blank"
+    class="submenu-item submenu-link">
+    Assembly
+  </a>
+
+ <div class="submenu-item">Disassembly</div>
+  </div>
+</div> <!-- ✅ THIS WAS MISSING -->
+
+  <!-- Ironing tips (accordion, text only) -->
+<div class="accordion">
+  <button class="accordion-btn accordion-toggle">
+    Ironing tips
+  </button>
+
+  <div class="accordion-content">
+    <div class="submenu-item">Vertical</div>
+    <div class="submenu-item">Tilt</div>
+    <div class="submenu-item">Horizontal</div>
+  </div>
+</div>
+
+</aside>
+
+</div>
+
+<script>
+  let idleTimer = null;
+  let isIdle = false;
+  let rotationRAF = null;
+
+  const IDLE_DELAY = 3000;
+  const ROTATION_SPEED = 0.01;
+
+  function startIdleRotation(viewer) {
+    if (rotationRAF) return;
+    isIdle = true;
+
+    function rotate() {
+      if (!isIdle) return;
+      const orbit = viewer.getCameraOrbit();
+      viewer.cameraOrbit = `${orbit.theta + ROTATION_SPEED}rad ${orbit.phi}rad ${orbit.radius}m`;
+      rotationRAF = requestAnimationFrame(rotate);
+    }
+    rotate();
+  }
+
+  function stopIdleRotation() {
+    isIdle = false;
+    if (rotationRAF) {
+      cancelAnimationFrame(rotationRAF);
+      rotationRAF = null;
+    }
+  }
+
+  function resetIdleTimer(viewer) {
+    stopIdleRotation();
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => startIdleRotation(viewer), IDLE_DELAY);
+  }
+</script>
+
+<!-- ================= LOADER SCRIPT ================= -->
+<script>
+  const loader = document.querySelector('.loader');
+  const progressText = document.querySelector('.progress-text');
+
+  let displayed = 0;
+  let target = 0;
+  let raf;
+
+  function animate() {
+    displayed += (target - displayed) * 0.12;
+
+    if (Math.abs(target - displayed) < 0.5) {
+      displayed = target;
+    }
+
+    progressText.textContent = `${Math.round(displayed)}%`;
+    raf = requestAnimationFrame(animate);
+  }
+
+    // ================= USER ACTIVITY =================
+  viewer.addEventListener('pointerdown', () => resetIdleTimer(viewer));
+  viewer.addEventListener('wheel', () => resetIdleTimer(viewer));
+  viewer.addEventListener('touchstart', () => resetIdleTimer(viewer));
+  viewer.addEventListener('progress', (e) => {
+    target = Math.min(e.detail.totalProgress * 100, 95);
+    if (!raf) animate();
+  });
+
+</script>
+
+<!-- ================= HOTSPOT SCRIPT ================= -->
+<script>
+  const waterHotspot  = document.getElementById('water-hotspot');
+  const calcHotspot   = document.getElementById('calc-hotspot');
+  const powerHotspot  = document.getElementById('power-hotspot');
+  const boardHotspot  = document.getElementById('board-hotspot');
+  const dockHotspot   = document.getElementById('dock-hotspot');
+  const ironHotspot   = document.getElementById('iron-hotspot');
+  const hangerHotspot = document.getElementById('hanger-hotspot');
+
+  function angularDistance(a, b) {
+    return Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
+  }
+
+  viewer.addEventListener('camera-change', () => {
+    if (!isIdle) resetIdleTimer(viewer);
+    
+    const { theta } = viewer.getCameraOrbit();
+
+    const TARGETS = [
+      { el: boardHotspot,  target: -0.15 },
+      { el: waterHotspot,  target:  0.10 },
+      { el: powerHotspot,  target:  0.48 },
+      { el: calcHotspot,   target:  0.55 },
+      { el: dockHotspot,   target:  0.80 },
+      { el: ironHotspot,   target:  1.00 },
+      { el: hangerHotspot, target:  Math.PI }
+    ];
+
+    const THRESHOLD = 0.3;
+
+    const distances = TARGETS.map(item => ({
+      ...item,
+      dist: angularDistance(theta, item.target),
+    }));
+
+    distances.sort((a, b) => a.dist - b.dist);
+
+    [
+      waterHotspot,
+      powerHotspot,
+      calcHotspot,
+      boardHotspot,
+      dockHotspot,
+      ironHotspot,
+      hangerHotspot
+    ].forEach(el => el && el.classList.remove('visible'));
+
+    if (distances[0] && distances[0].dist < THRESHOLD) {
+      distances[0].el.classList.add('visible');
+    }
+  });
+
+    // ================= INIT =================
+  viewer.addEventListener('load', () => {
+    resetIdleTimer();
+  });
+</script>
+
+<script>
+  const menuIcon = document.getElementById('menu-btn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  // Toggle sidebar
+  menuIcon.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+  });
+
+  // Close on overlay tap
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+  });
+
+  // Accordion logic
+  document.querySelectorAll('.accordion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      const panel = btn.nextElementSibling;
+      panel.style.maxHeight = panel.style.maxHeight
+        ? null
+        : panel.scrollHeight + "px";
+    });
+  });
+</script>
+
+<script>
+  document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const accordion = header.parentElement;
+      accordion.classList.toggle('open');
+    });
+  });
+</script>
+
+<script>
+  const homeScreen = document.getElementById('home-screen');
+  const exploreScreen = document.getElementById('explore-screen');
+  const exploreBtn = document.getElementById('explore-btn');
+
+  const exploreLoader = document.getElementById('explore-loader');
+
+exploreBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  // 1. Show loader IMMEDIATELY
+  exploreLoader.style.display = 'flex';
+  exploreLoader.style.opacity = '1';
+
+  // 2. Switch screens
+  homeScreen.classList.remove('active');
+  exploreScreen.classList.add('active');
+
+  // 3. Give visual feedback even if model is cached
+  setTimeout(() => {
+    exploreLoader.style.opacity = '0';
+
+    setTimeout(() => {
+      exploreLoader.style.display = 'none';
+    }, 300);
+  }, 700);
+
+  // 4. Reset idle rotation safely
+  if (typeof resetIdleTimer === 'function') {
+    resetIdleTimer(viewer);
+  }
+});
+
+</script>
+
+<script>
+  const exitBtn = document.getElementById('exit-btn');
+
+  exitBtn.addEventListener('click', () => {
+    // Stop idle rotation if running
+    if (typeof stopIdleRotation === 'function') {
+      stopIdleRotation();
+    }
+
+    // Hide Explore screen
+    exploreScreen.classList.remove('active');
+
+    // Show Home screen
+    homeScreen.classList.add('active');
+
+    // Restore interaction
+    homeScreen.style.pointerEvents = 'auto';
+  });
+</script>
+
+<script>
+  const backBtn = document.getElementById('back-btn');
+
+  backBtn.addEventListener('click', () => {
+    // Hide explore screen
+    exploreScreen.classList.remove('active');
+
+    // Show home screen
+    homeScreen.classList.add('active');
+
+    // Optional: stop idle rotation cleanly
+    if (typeof stopIdleRotation === 'function') {
+      stopIdleRotation();
+    }
+  });
+</script>
+
+</body>
+</html>
